@@ -49,14 +49,75 @@ func main() {
 	}
 	for r := 0; r < heightInt; r++ {
 		for c := 0; c < widthInt; c++ {
-			game.grid[r][c].neighborMines = rand.IntN(5)
+			randSeed := rand.IntN(5)
+			if randSeed == 0 {
+				game.grid[r][c].isMine = true
+
+			}
 		}
 
 	}
 	for r := 0; r < heightInt; r++ {
 		for c := 0; c < widthInt; c++ {
-			fmt.Print(game.grid[r][c].neighborMines)
-			fmt.Print("  ")
+			surroundingMines := 0
+			if c > 0 {
+				if game.grid[r][c-1].isMine {
+					surroundingMines = surroundingMines + 1
+				}
+				if r > 0 {
+					if game.grid[r-1][c-1].isMine {
+						surroundingMines = surroundingMines + 1
+					}
+				}
+				if r < heightInt-1 {
+					if game.grid[r+1][c-1].isMine {
+						surroundingMines = surroundingMines + 1
+					}
+				}
+
+			}
+			if c < widthInt-1 {
+				if game.grid[r][c+1].isMine {
+					surroundingMines = surroundingMines + 1
+				}
+				if r > 0 {
+					if game.grid[r-1][c+1].isMine {
+						surroundingMines = surroundingMines + 1
+					}
+
+				}
+				if r < heightInt-1 {
+					if game.grid[r+1][c+1].isMine {
+						surroundingMines = surroundingMines + 1
+					}
+				}
+			}
+			if r > 0 {
+				if game.grid[r-1][c].isMine {
+					surroundingMines = surroundingMines + 1
+				}
+			}
+			if r < heightInt-1 {
+				if game.grid[r+1][c].isMine {
+					surroundingMines = surroundingMines + 1
+				}
+			}
+			game.grid[r][c].neighborMines = surroundingMines
+		}
+	}
+	for r := 0; r < heightInt; r++ {
+		for c := 0; c < widthInt; c++ {
+			if game.grid[r][c].isMine {
+				fmt.Print("* ")
+			} else {
+				fmt.Print(". ")
+			}
+		}
+		fmt.Println()
+	}
+	for r := 0; r < heightInt; r++ {
+		for c := 0; c < widthInt; c++ {
+			fmt.Printf("%d ", game.grid[r][c].neighborMines)
 		}
 		fmt.Println()
 	}
