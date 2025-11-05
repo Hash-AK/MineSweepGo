@@ -5,6 +5,8 @@ import (
 	"math/rand/v2"
 	"os"
 	"strconv"
+
+	"github.com/gdamore/tcell/v2"
 )
 
 type Cell struct {
@@ -18,6 +20,11 @@ type Grid struct {
 }
 
 func main() {
+	screen, err := tcell.NewScreen()
+	if err != nil {
+		fmt.Printf("Error initializing screen : %s\n", err)
+	}
+	screen.Clear()
 	var height string
 	var width string
 	if len(os.Args) > 2 {
