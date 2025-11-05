@@ -20,12 +20,23 @@ type Grid struct {
 func main() {
 	var height string
 	var width string
-	if len(os.Args[1]) > 0 && len(os.Args[2]) > 0 {
+	if len(os.Args) > 2 {
 		height = os.Args[1]
 		width = os.Args[2]
+	} else {
+		fmt.Println("Usage : go run . <height> <width>. Using default 10x10.")
+		height = "10"
+		width = "10"
 	}
-	widthInt, _ := strconv.Atoi(width)
-	heightInt, _ := strconv.Atoi(height)
+	heightInt, err := strconv.Atoi(height)
+	if err != nil {
+		fmt.Println("Invalid height. Using default 10.")
+	}
+
+	widthInt, err := strconv.Atoi(width)
+	if err != nil {
+		fmt.Println("Invalid width. Using default 10.")
+	}
 	fmt.Printf("Height : %s", height)
 	fmt.Println()
 	fmt.Printf("Width : %s", width)
