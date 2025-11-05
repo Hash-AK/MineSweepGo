@@ -24,7 +24,10 @@ func main() {
 	if err != nil {
 		fmt.Printf("Error initializing screen : %s\n", err)
 	}
-	screen.Clear()
+	if err := screen.Init(); err != nil {
+		fmt.Printf("Failed to initialize screen : %s", err)
+	}
+	defer screen.Fini()
 	var height string
 	var width string
 	if len(os.Args) > 2 {
@@ -127,6 +130,18 @@ func main() {
 			fmt.Printf("%d ", game.grid[r][c].neighborMines)
 		}
 		fmt.Println()
+	}
+	for {
+		screen.Show()
+		event := screen.PollEvent()
+		switch ev := event.(type) {
+		case *tcell.EventKey:
+			if ev.Key() == tcell.KeyEscape || ev.Key() == tcell.KeyCtrlC {
+				return
+
+			}
+
+		}
 	}
 
 }
