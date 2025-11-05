@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/gdamore/tcell/v2"
+	"github.com/mattn/go-runewidth"
 )
 
 type Cell struct {
@@ -19,6 +20,19 @@ type Grid struct {
 	grid [][]Cell
 }
 
+func printString(screen tcell.Screen, x, y int, style tcell.Style, str string) {
+	for _, c := range str {
+		var comb []rune
+		w := runewidth.RuneWidth(c)
+		if w == 0 {
+			comb = []rune{c}
+			c = ' '
+			w = 1
+		}
+		screen.SetContent(x, y, c, comb, style)
+		x += w
+	}
+}
 func main() {
 	screen, err := tcell.NewScreen()
 	if err != nil {
@@ -131,15 +145,21 @@ func main() {
 		}
 		fmt.Println()
 	}
+	defstyle := tcell.StyleDefault.Background(tcell.ColorBlack).Foreground(tcell.ColorWhite)
+	screen.SetStyle(defstyle)
 	for {
 		screen.Show()
 		event := screen.PollEvent()
+		termWidth, termHeight := screen.Size()
 		switch ev := event.(type) {
 		case *tcell.EventKey:
 			if ev.Key() == tcell.KeyEscape || ev.Key() == tcell.KeyCtrlC {
 				return
 
 			}
+		case *tcell.EventResize:
+			screen.Clear()
+			printString(screen, termWidth/2, termHeight/2, defstyle, "hello world")
 
 		}
 	}
