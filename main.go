@@ -129,25 +129,35 @@ func main() {
 			game.grid[r][c].neighborMines = surroundingMines
 		}
 	}
-	for r := 0; r < heightInt; r++ {
-		for c := 0; c < widthInt; c++ {
-			if game.grid[r][c].isMine {
-				fmt.Print("* ")
-			} else {
-				fmt.Print(". ")
+	/*
+		for r := 0; r < heightInt; r++ {
+			for c := 0; c < widthInt; c++ {
+				if game.grid[r][c].isMine {
+					fmt.Print("* ")
+				} else {
+					fmt.Print(". ")
+				}
 			}
+			fmt.Println()
 		}
-		fmt.Println()
-	}
-	for r := 0; r < heightInt; r++ {
-		for c := 0; c < widthInt; c++ {
-			fmt.Printf("%d ", game.grid[r][c].neighborMines)
+		for r := 0; r < heightInt; r++ {
+			for c := 0; c < widthInt; c++ {
+				fmt.Printf("%d ", game.grid[r][c].neighborMines)
+			}
+			fmt.Println()
 		}
-		fmt.Println()
-	}
+	*/
 	defstyle := tcell.StyleDefault.Background(tcell.ColorBlack).Foreground(tcell.ColorWhite)
 	screen.SetStyle(defstyle)
 	for {
+		for r := 0; r < heightInt; r++ {
+			for c := 0; c < widthInt*2; c++ {
+				screen.SetContent(c, r, '■', nil, defstyle)
+				screen.SetContent(c+1, r, ' ', nil, defstyle)
+				c++
+
+			}
+		}
 		screen.Show()
 		event := screen.PollEvent()
 		termWidth, termHeight := screen.Size()
