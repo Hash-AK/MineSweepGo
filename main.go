@@ -15,6 +15,7 @@ type Cell struct {
 	isRevealed    bool
 	isFlagged     bool
 	neighborMines int
+	isSelected    bool
 }
 type Grid struct {
 	grid [][]Cell
@@ -34,6 +35,8 @@ func printString(screen tcell.Screen, x, y int, style tcell.Style, str string) {
 	}
 }
 func main() {
+	selectedX := 0
+	selectedY := 0
 	screen, err := tcell.NewScreen()
 	if err != nil {
 		fmt.Printf("Error initializing screen : %s\n", err)
@@ -148,13 +151,26 @@ func main() {
 		}
 	*/
 	defstyle := tcell.StyleDefault.Background(tcell.ColorBlack).Foreground(tcell.ColorWhite)
+	selectedStyle := tcell.StyleDefault.Background(tcell.ColorBlack).Foreground(tcell.ColorBlue)
 	screen.SetStyle(defstyle)
+	game.grid[selectedY][selectedX].isSelected = true
 	for {
+		game.grid[selectedY][selectedX].isSelected = true
+
 		for r := 0; r < heightInt; r++ {
-			for c := 0; c < widthInt*2; c++ {
-				screen.SetContent(c, r, '■', nil, defstyle)
-				screen.SetContent(c+1, r, ' ', nil, defstyle)
-				c++
+			for c := 0; c < widthInt; c++ {
+
+				//screen.SetContent(c, r, '■', nil, defstyle)
+				printString(screen, c, r, defstyle, "■ ")
+				if !game.grid[r][c].isSelected {
+					//screen.SetContent(c, r, '■', nil, defstyle)\
+					printString(screen, c, r, defstyle, "■ ")
+				} else {
+					printString(screen, c, r, selectedStyle, "■ ")
+				}
+
+				//screen.SetContent(c+1, r, ' ', nil, defstyle)
+				//c++
 
 			}
 		}
@@ -167,9 +183,22 @@ func main() {
 				return
 
 			}
+			if ev.Key() == tcell.KeyRight {
+				if selectedX < widthInt-1 {
+					game.grid[selectedY][selectedX].isSelected = false
+
+					selectedX = selectedX + 1
+				}
+			}
+			if ev.Key() == tcell.KeyLeft {
+				if selectedX > 0 {
+					game.grid[selectedY][selectedX].isSelected = false
+					selectedX = selectedX - 1
+				}
+			}
 		case *tcell.EventResize:
 			screen.Clear()
-			printString(screen, termWidth/2, termHeight/2, defstyle, "hello world")
+			printString(screen, termWidth/2, termHeight/2, defstyle, "test")
 
 		}
 	}
