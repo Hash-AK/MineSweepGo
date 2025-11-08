@@ -158,19 +158,17 @@ func main() {
 		game.grid[selectedY][selectedX].isSelected = true
 
 		for r := 0; r < heightInt; r++ {
+			screenX := 0
 			for c := 0; c < widthInt; c++ {
 
-				//screen.SetContent(c, r, '■', nil, defstyle)
-				printString(screen, c, r, defstyle, "■ ")
-				if !game.grid[r][c].isSelected {
-					//screen.SetContent(c, r, '■', nil, defstyle)\
-					printString(screen, c, r, defstyle, "■ ")
-				} else {
-					printString(screen, c, r, selectedStyle, "■ ")
+				styleToUse := defstyle
+				if game.grid[r][c].isSelected {
+					styleToUse = selectedStyle
 				}
+				screen.SetContent(screenX, r, '■', nil, styleToUse)
 
-				//screen.SetContent(c+1, r, ' ', nil, defstyle)
-				//c++
+				screen.SetContent(screenX+1, r, ' ', nil, styleToUse)
+				screenX += 2
 
 			}
 		}
@@ -196,11 +194,25 @@ func main() {
 					selectedX = selectedX - 1
 				}
 			}
+			if ev.Key() == tcell.KeyDown {
+				if selectedY < heightInt-1 {
+					game.grid[selectedY][selectedX].isSelected = false
+					selectedY = selectedY + 1
+				}
+
+			}
+			if ev.Key() == tcell.KeyUp {
+				if selectedY > 0 {
+					game.grid[selectedY][selectedX].isSelected = false
+					selectedY = selectedY - 1
+				}
+			}
 		case *tcell.EventResize:
 			screen.Clear()
 			printString(screen, termWidth/2, termHeight/2, defstyle, "test")
 
 		}
+		screen.Clear()
 	}
 
 }
