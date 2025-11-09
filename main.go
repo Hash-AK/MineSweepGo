@@ -180,6 +180,7 @@ func main() {
 	mineStyle := tcell.StyleDefault.Background(tcell.ColorBlack).Foreground(tcell.ColorRed)
 	flaggedStyle := tcell.StyleDefault.Background(tcell.ColorBlack).Foreground(tcell.ColorOrange)
 	logoStyle := tcell.StyleDefault.Background(tcell.ColorBlack).Foreground(tcell.ColorGreen)
+	linkStyle := tcell.StyleDefault.Foreground(tcell.ColorAqua).Underline(true)
 	screen.SetStyle(defstyle)
 	game.grid[selectedY][selectedX].isSelected = true
 	for {
@@ -195,7 +196,10 @@ func main() {
 		printString(screen, logoX, startY-2, logoStyle, "                                      |_|            ")
 		instructions := "Arrow key to move selection | 'F' to flag | Enter to reveal"
 		instructionsX := termWidth/2 - len(instructions)/2
-		printString(screen, instructionsX, startY+widthInt+3, logoStyle, instructions)
+		printString(screen, instructionsX, startY+heightInt+2, logoStyle, instructions)
+		credits := "By github.com/Hash-AK"
+		creditsX := termWidth/2 - len(credits)/2
+		printString(screen, creditsX, startY+heightInt+4, linkStyle, credits)
 		game.grid[selectedY][selectedX].isSelected = true
 		screen.SetContent(startX-2, startY-1, '╭', nil, defstyle)
 		screen.SetContent(startX+widthInt*2, startY-1, '╮', nil, defstyle)
