@@ -24,6 +24,15 @@ type Grid struct {
 var gameState string
 var totalMines, totalTiles int
 
+func (grid *Grid) revealAllMine() {
+	for r := range grid.grid {
+		for c := range grid.grid[r] {
+			if grid.grid[r][c].isMine {
+				grid.grid[r][c].isRevealed = true
+			}
+		}
+	}
+}
 func (grid *Grid) revealCell(r, c int) {
 	height := len(grid.grid)
 	if height == 0 {
@@ -330,7 +339,9 @@ func main() {
 				}
 				if ev.Key() == tcell.KeyEnter {
 					game.revealCell(selectedY, selectedX)
-					if gameState != "lost" {
+					if gameState == "lost" {
+						game.revealAllMine()
+					} else {
 						if game.checkWin() {
 							gameState = "won"
 						}
