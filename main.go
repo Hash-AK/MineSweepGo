@@ -21,6 +21,10 @@ type Grid struct {
 	grid [][]Cell
 }
 
+var gameState string
+var totalRevealedTiles int
+var totalMines, totalTiles int
+
 func (grid *Grid) revealCell(r, c int) {
 	height := len(grid.grid)
 	if height == 0 {
@@ -34,6 +38,12 @@ func (grid *Grid) revealCell(r, c int) {
 		return
 	}
 	grid.grid[r][c].isRevealed = true
+	if grid.grid[r][c].isMine {
+		gameState = "lost"
+
+	}
+	totalRevealedTiles = totalRevealedTiles + 1
+
 	if grid.grid[r][c].neighborMines == 0 && grid.grid[r][c].isMine == false {
 		grid.revealCell(r-1, c-1)
 		grid.revealCell(r-1, c)
@@ -43,6 +53,9 @@ func (grid *Grid) revealCell(r, c int) {
 		grid.revealCell(r+1, c)
 		grid.revealCell(r+1, c-1)
 		grid.revealCell(r+1, c+1)
+	}
+	if totalTiles-totalRevealedTiles == totalMines {
+		gameState = "won"
 	}
 
 }
@@ -62,8 +75,11 @@ func printString(screen tcell.Screen, x, y int, style tcell.Style, str string) {
 func main() {
 	selectedX := 0
 	selectedY := 0
-	totalMines := 0
+	totalMines = 0
 	flagNumbers := 0
+	totalTiles = 0
+	totalRevealedTiles = 0
+	gameState = "playing"
 	screen, err := tcell.NewScreen()
 	if err != nil {
 		fmt.Printf("Error initializing screen : %s\n", err)
@@ -109,12 +125,14 @@ func main() {
 				totalMines = totalMines + 1
 
 			}
+
 		}
 
 	}
 	for r := 0; r < heightInt; r++ {
 		for c := 0; c < widthInt; c++ {
 			surroundingMines := 0
+			totalTiles = totalTiles + 1
 			if c > 0 {
 				if game.grid[r][c-1].isMine {
 					surroundingMines = surroundingMines + 1
@@ -160,24 +178,7 @@ func main() {
 			game.grid[r][c].neighborMines = surroundingMines
 		}
 	}
-	/*
-		for r := 0; r < heightInt; r++ {
-			for c := 0; c < widthInt; c++ {
-				if game.grid[r][c].isMine {
-					fmt.Print("* ")
-				} else {
-					fmt.Print(". ")
-				}
-			}
-			fmt.Println()
-		}
-		for r := 0; r < heightInt; r++ {
-			for c := 0; c < widthInt; c++ {
-				fmt.Printf("%d ", game.grid[r][c].neighborMines)
-			}
-			fmt.Println()
-		}
-	*/
+
 	defstyle := tcell.StyleDefault.Background(tcell.ColorBlack).Foreground(tcell.ColorWhite)
 	selectedStyle := tcell.StyleDefault.Background(tcell.ColorBlack).Foreground(tcell.ColorBlue)
 	mineStyle := tcell.StyleDefault.Background(tcell.ColorBlack).Foreground(tcell.ColorRed)
@@ -205,7 +206,7 @@ func main() {
 		creditsX := termWidth/2 - len(credits)/2
 		printString(screen, creditsX, startY+heightInt+4, linkStyle, credits)
 		game.grid[selectedY][selectedX].isSelected = true
-		status := fmt.Sprintf("Flags Place/Total Mines : %d, %d", flagNumbers, totalMines)
+		status := fmt.Sprintf("Flags Place/Total Mines : %d/%d", flagNumbers, totalMines)
 		statusX := startX + widthInt*2 + 5
 		statusY := termHeight / 2
 		printString(screen, statusX, statusY, logoStyle, status)
@@ -263,58 +264,70 @@ func main() {
 
 			}
 		}
+
 		screen.Show()
 		event := screen.PollEvent()
-		switch ev := event.(type) {
-		case *tcell.EventKey:
-			if ev.Key() == tcell.KeyEscape || ev.Key() == tcell.KeyCtrlC {
-				return
+		if gameState == "playing" {
+			switch ev := event.(type) {
+			case *tcell.EventKey:
+				if ev.Key() == tcell.KeyEscape || ev.Key() == tcell.KeyCtrlC {
+					return
 
-			}
-			if ev.Key() == tcell.KeyRight {
-				if selectedX < widthInt-1 {
-					game.grid[selectedY][selectedX].isSelected = false
+				}
+				if ev.Key() == tcell.KeyRight {
+					if selectedX < widthInt-1 {
+						game.grid[selectedY][selectedX].isSelected = false
 
-					selectedX = selectedX + 1
+						selectedX = selectedX + 1
+					}
 				}
-			}
-			if ev.Key() == tcell.KeyLeft {
-				if selectedX > 0 {
-					game.grid[selectedY][selectedX].isSelected = false
-					selectedX = selectedX - 1
+				if ev.Key() == tcell.KeyLeft {
+					if selectedX > 0 {
+						game.grid[selectedY][selectedX].isSelected = false
+						selectedX = selectedX - 1
+					}
 				}
-			}
-			if ev.Key() == tcell.KeyDown {
-				if selectedY < heightInt-1 {
-					game.grid[selectedY][selectedX].isSelected = false
-					selectedY = selectedY + 1
-				}
-
-			}
-			if ev.Key() == tcell.KeyUp {
-				if selectedY > 0 {
-					game.grid[selectedY][selectedX].isSelected = false
-					selectedY = selectedY - 1
-				}
-			}
-			if ev.Key() == tcell.KeyEnter {
-				game.revealCell(selectedY, selectedX)
-			}
-			if ev.Key() == tcell.KeyRune {
-				if ev.Rune() == 'f' {
-					if game.grid[selectedY][selectedX].isFlagged == false {
-						game.grid[selectedY][selectedX].isFlagged = true
-						flagNumbers = flagNumbers + 1
-					} else {
-						game.grid[selectedY][selectedX].isFlagged = false
-						flagNumbers = flagNumbers - 1
+				if ev.Key() == tcell.KeyDown {
+					if selectedY < heightInt-1 {
+						game.grid[selectedY][selectedX].isSelected = false
+						selectedY = selectedY + 1
 					}
 
 				}
+				if ev.Key() == tcell.KeyUp {
+					if selectedY > 0 {
+						game.grid[selectedY][selectedX].isSelected = false
+						selectedY = selectedY - 1
+					}
+				}
+				if ev.Key() == tcell.KeyEnter {
+					game.revealCell(selectedY, selectedX)
+				}
+				if ev.Key() == tcell.KeyRune {
+					if ev.Rune() == 'f' {
+						if game.grid[selectedY][selectedX].isFlagged == false {
+							game.grid[selectedY][selectedX].isFlagged = true
+							flagNumbers = flagNumbers + 1
+						} else {
+							game.grid[selectedY][selectedX].isFlagged = false
+							flagNumbers = flagNumbers - 1
+						}
+
+					}
+				}
+			case *tcell.EventResize:
+				screen.Clear()
+				termWidth, termHeight = screen.Size()
+
 			}
-		case *tcell.EventResize:
-			screen.Clear()
-			termWidth, termHeight = screen.Size()
+		} else {
+			switch ev := event.(type) {
+			case *tcell.EventKey:
+				if ev.Key() == tcell.KeyEscape || ev.Key() == tcell.KeyCtrlC {
+					return
+
+				}
+			}
 
 		}
 	}
