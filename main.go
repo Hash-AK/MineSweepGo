@@ -22,7 +22,6 @@ type Grid struct {
 }
 
 var gameState string
-var totalRevealedTiles int
 var totalMines, totalTiles int
 
 func (grid *Grid) revealCell(r, c int) {
@@ -42,7 +41,6 @@ func (grid *Grid) revealCell(r, c int) {
 		gameState = "lost"
 
 	}
-	totalRevealedTiles = totalRevealedTiles + 1
 
 	if grid.grid[r][c].neighborMines == 0 && grid.grid[r][c].isMine == false {
 		grid.revealCell(r-1, c-1)
@@ -85,7 +83,6 @@ func main() {
 	totalMines = 0
 	flagNumbers := 0
 	totalTiles = 0
-	totalRevealedTiles = 0
 	gameState = "playing"
 	screen, err := tcell.NewScreen()
 	if err != nil {
@@ -244,12 +241,23 @@ func main() {
 				styleToUse := defstyle
 				var charToDraw rune
 				if game.grid[r][c].isSelected {
-					styleToUse = selectedStyle
+					if game.grid[r][c].neighborMines == 0 && game.grid[r][c].isRevealed && !game.grid[r][c].isMine {
+						styleToUse = selectedStyle.Background(tcell.ColorBlue)
+
+					} else {
+						styleToUse = selectedStyle
+
+					}
 				}
 				if !game.grid[r][c].isRevealed {
 					if game.grid[r][c].isFlagged {
 						charToDraw = 'f'
-						styleToUse = flaggedStyle
+						if game.grid[r][c].isSelected {
+							styleToUse = flaggedStyle.Background(tcell.ColorDarkGreen)
+
+						} else {
+							styleToUse = flaggedStyle
+						}
 					} else {
 						charToDraw = '■'
 					}
@@ -271,16 +279,18 @@ func main() {
 
 			}
 		}
-		if gameState == "lost" {
+		switch gameState {
+		case "lost":
 			msg := "GAME OVER"
 			msgX := termWidth/2 - len(msg)/2
 			msgY := termHeight / 2
 			printString(screen, msgX, msgY, mineStyle.Bold(true), msg)
-		} else if gameState == "won" {
+		case "won":
 			msg := "YOU WIN!"
 			msgX := termWidth/2 - len(msg)/2
 			msgY := termHeight / 2
 			printString(screen, msgX, msgY, logoStyle.Bold(true), msg)
+
 		}
 
 		screen.Show()
