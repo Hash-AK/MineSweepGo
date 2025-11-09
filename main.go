@@ -21,6 +21,31 @@ type Grid struct {
 	grid [][]Cell
 }
 
+func (grid *Grid) revealCell(r, c int) {
+	height := len(grid.grid)
+	if height == 0 {
+		return
+	}
+	width := len(grid.grid[0])
+	if r < 0 || r >= height || c < 0 || c >= width {
+		return
+	}
+	if grid.grid[r][c].isRevealed {
+		return
+	}
+	grid.grid[r][c].isRevealed = true
+	if grid.grid[r][c].neighborMines == 0 && grid.grid[r][c].isMine == false {
+		grid.revealCell(r-1, c-1)
+		grid.revealCell(r-1, c)
+		grid.revealCell(r-1, c+1)
+		grid.revealCell(r, c-1)
+		grid.revealCell(r, c+1)
+		grid.revealCell(r+1, c)
+		grid.revealCell(r+1, c-1)
+		grid.revealCell(r+1, c+1)
+	}
+
+}
 func printString(screen tcell.Screen, x, y int, style tcell.Style, str string) {
 	for _, c := range str {
 		var comb []rune
@@ -157,6 +182,8 @@ func main() {
 	screen.SetStyle(defstyle)
 	game.grid[selectedY][selectedX].isSelected = true
 	for {
+		screen.Clear()
+
 		termWidth, termHeight := screen.Size()
 		startX := termWidth/2 - widthInt
 		startY := termHeight/2 - heightInt/2
@@ -231,7 +258,7 @@ func main() {
 				}
 			}
 			if ev.Key() == tcell.KeyEnter {
-				game.grid[selectedY][selectedX].isRevealed = true
+				game.revealCell(selectedY, selectedX)
 			}
 			if ev.Key() == tcell.KeyRune {
 				if ev.Rune() == 'f' {
@@ -245,11 +272,9 @@ func main() {
 			}
 		case *tcell.EventResize:
 			screen.Clear()
-			printString(screen, termWidth/2, termHeight/2, defstyle, "test")
 			termWidth, termHeight = screen.Size()
 
 		}
-		screen.Clear()
 	}
 
 }
