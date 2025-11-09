@@ -152,29 +152,52 @@ func main() {
 	*/
 	defstyle := tcell.StyleDefault.Background(tcell.ColorBlack).Foreground(tcell.ColorWhite)
 	selectedStyle := tcell.StyleDefault.Background(tcell.ColorBlack).Foreground(tcell.ColorBlue)
+	mineStyle := tcell.StyleDefault.Background(tcell.ColorBlack).Foreground(tcell.ColorRed)
+	flaggedStyle := tcell.StyleDefault.Background(tcell.ColorBlack).Foreground(tcell.ColorOrange)
 	screen.SetStyle(defstyle)
 	game.grid[selectedY][selectedX].isSelected = true
 	for {
+		termWidth, termHeight := screen.Size()
+		startX := termWidth/2 - widthInt
+		startY := termHeight/2 - heightInt/2
 		game.grid[selectedY][selectedX].isSelected = true
 
 		for r := 0; r < heightInt; r++ {
-			screenX := 0
+			screenX := startX
 			for c := 0; c < widthInt; c++ {
 
 				styleToUse := defstyle
+				var charToDraw rune
 				if game.grid[r][c].isSelected {
 					styleToUse = selectedStyle
 				}
-				screen.SetContent(screenX, r, '■', nil, styleToUse)
+				if !game.grid[r][c].isRevealed {
+					if game.grid[r][c].isFlagged {
+						charToDraw = 'f'
+						styleToUse = flaggedStyle
+					} else {
+						charToDraw = '■'
+					}
+				} else {
+					if game.grid[r][c].isMine {
+						charToDraw = '*'
+						styleToUse = mineStyle
+					} else if game.grid[r][c].neighborMines == 0 {
+						charToDraw = ' '
+					} else {
+						charToDraw = rune(strconv.Itoa(game.grid[r][c].neighborMines)[0])
+					}
+				}
+				screen.SetContent(screenX, r+startY, charToDraw, nil, styleToUse)
 
-				screen.SetContent(screenX+1, r, ' ', nil, styleToUse)
+				screen.SetContent(screenX+1, r+startY, ' ', nil, defstyle)
+
 				screenX += 2
 
 			}
 		}
 		screen.Show()
 		event := screen.PollEvent()
-		termWidth, termHeight := screen.Size()
 		switch ev := event.(type) {
 		case *tcell.EventKey:
 			if ev.Key() == tcell.KeyEscape || ev.Key() == tcell.KeyCtrlC {
@@ -207,9 +230,23 @@ func main() {
 					selectedY = selectedY - 1
 				}
 			}
+			if ev.Key() == tcell.KeyEnter {
+				game.grid[selectedY][selectedX].isRevealed = true
+			}
+			if ev.Key() == tcell.KeyRune {
+				if ev.Rune() == 'f' {
+					if game.grid[selectedY][selectedX].isFlagged == false {
+						game.grid[selectedY][selectedX].isFlagged = true
+					} else {
+						game.grid[selectedY][selectedX].isFlagged = false
+					}
+
+				}
+			}
 		case *tcell.EventResize:
 			screen.Clear()
 			printString(screen, termWidth/2, termHeight/2, defstyle, "test")
+			termWidth, termHeight = screen.Size()
 
 		}
 		screen.Clear()
