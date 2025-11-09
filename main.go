@@ -179,16 +179,44 @@ func main() {
 	selectedStyle := tcell.StyleDefault.Background(tcell.ColorBlack).Foreground(tcell.ColorBlue)
 	mineStyle := tcell.StyleDefault.Background(tcell.ColorBlack).Foreground(tcell.ColorRed)
 	flaggedStyle := tcell.StyleDefault.Background(tcell.ColorBlack).Foreground(tcell.ColorOrange)
+	logoStyle := tcell.StyleDefault.Background(tcell.ColorBlack).Foreground(tcell.ColorGreen)
 	screen.SetStyle(defstyle)
 	game.grid[selectedY][selectedX].isSelected = true
 	for {
 		screen.Clear()
-
 		termWidth, termHeight := screen.Size()
 		startX := termWidth/2 - widthInt
 		startY := termHeight/2 - heightInt/2
+		logoX := termWidth/2 - len(" |_|  |_|_|_||_\\___|___/\\_/\\_/\\___\\___| .__/\\___\\___/")/2
+		printString(screen, logoX, startY-6, logoStyle, "  __  __ _          ___                      ___     ")
+		printString(screen, logoX, startY-5, logoStyle, " |  \\/  (_)_ _  ___/ __|_ __ _____ ___ _ __ / __|___ ")
+		printString(screen, logoX, startY-4, logoStyle, " | |\\/| | | ' \\/ -_)__ \\ V  V / -_) -_) '_ \\ (_ / _ \\")
+		printString(screen, logoX, startY-3, logoStyle, " |_|  |_|_|_||_\\___|___/\\_/\\_/\\___\\___| .__/\\___\\___/")
+		printString(screen, logoX, startY-2, logoStyle, "                                      |_|            ")
+		instructions := "Arrow key to move selection | 'F' to flag | Enter to reveal"
+		instructionsX := termWidth/2 - len(instructions)/2
+		printString(screen, instructionsX, startY+widthInt+3, logoStyle, instructions)
 		game.grid[selectedY][selectedX].isSelected = true
+		screen.SetContent(startX-2, startY-1, '╭', nil, defstyle)
+		screen.SetContent(startX+widthInt*2, startY-1, '╮', nil, defstyle)
 
+		screen.SetContent(startX-2, startY+heightInt, '╰', nil, defstyle)
+
+		screen.SetContent(startX+widthInt*2, startY+heightInt, '╯', nil, defstyle)
+
+		for x := -1; x < widthInt*2; x++ {
+			screen.SetContent(startX+x, startY-1, '─', nil, defstyle)
+
+		}
+		for x := -1; x < widthInt*2; x++ {
+			screen.SetContent(startX+x, startY+heightInt, '─', nil, defstyle)
+		}
+		for y := 0; y < heightInt; y++ {
+			screen.SetContent(startX-2, startY+y, '│', nil, defstyle)
+		}
+		for y := 0; y < heightInt; y++ {
+			screen.SetContent(startX+widthInt*2, startY+y, '│', nil, defstyle)
+		}
 		for r := 0; r < heightInt; r++ {
 			screenX := startX
 			for c := 0; c < widthInt; c++ {
