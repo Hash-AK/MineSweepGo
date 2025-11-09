@@ -54,10 +54,17 @@ func (grid *Grid) revealCell(r, c int) {
 		grid.revealCell(r+1, c-1)
 		grid.revealCell(r+1, c+1)
 	}
-	if totalTiles-totalRevealedTiles == totalMines {
-		gameState = "won"
-	}
 
+}
+func (grid *Grid) checkWin() bool {
+	for r := range grid.grid {
+		for c := range grid.grid[r] {
+			if !grid.grid[r][c].isMine && !grid.grid[r][c].isRevealed {
+				return false
+			}
+		}
+	}
+	return true
 }
 func printString(screen tcell.Screen, x, y int, style tcell.Style, str string) {
 	for _, c := range str {
@@ -264,6 +271,17 @@ func main() {
 
 			}
 		}
+		if gameState == "lost" {
+			msg := "GAME OVER"
+			msgX := termWidth/2 - len(msg)/2
+			msgY := termHeight / 2
+			printString(screen, msgX, msgY, mineStyle.Bold(true), msg)
+		} else if gameState == "won" {
+			msg := "YOU WIN!"
+			msgX := termWidth/2 - len(msg)/2
+			msgY := termHeight / 2
+			printString(screen, msgX, msgY, logoStyle.Bold(true), msg)
+		}
 
 		screen.Show()
 		event := screen.PollEvent()
@@ -302,6 +320,11 @@ func main() {
 				}
 				if ev.Key() == tcell.KeyEnter {
 					game.revealCell(selectedY, selectedX)
+					if gameState != "lost" {
+						if game.checkWin() {
+							gameState = "won"
+						}
+					}
 				}
 				if ev.Key() == tcell.KeyRune {
 					if ev.Rune() == 'f' {
