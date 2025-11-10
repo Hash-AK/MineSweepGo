@@ -1,6 +1,8 @@
 ## MineSweepGo
 A recreation of the iconic MineSweeper in Golang, in the terminal! This was made for [Siege by HackClub](https://siege.hackclub.com). It uses the Tcell Go module to facilitate operation with the terminal and the TUI interface.
 
+![demo img](/minesweepgo.png)
+
 ## How To Play
 Install a binary from the Release page, or do the following :
 ```bash
